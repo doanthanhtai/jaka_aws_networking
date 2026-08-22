@@ -329,3 +329,86 @@ If you want, I can also:
 - add a minimal `bastion` Terraform resource to this repo and wire the SGs
 - create a basic GitHub Actions workflow that runs `terraform init/plan` on PRs and `terraform apply` on protected branch with OIDC role assumption
 
+---
+
+## Infra Diagram
+
+```mermaid
+flowchart TB
+    Internet((Internet))
+    Admin[Admin workstation]
+
+    subgraph VPC["VPC 10.0.0.0/16 — vpc-lab-dev"]
+        IGW[["Internet Gateway"]]
+        RTPub[["Route Table: public\n0.0.0.0/0 → IGW\nlocal → 10.0.0.0/16 (implicit)"]]
+        RTPriv[["Route Table: private\n0.0.0.0/0 → NAT\nlocal → 10.0.0.0/16 (implicit)"]]
+
+        subgraph AZ1["AZ ap-southeast-1a"]
+            subgraph Pub1["Public Subnet 1 — 10.0.1.0/24"]
+                NAT[["NAT Gateway"]]
+                ALB1["ALB node"]
+            end
+            subgraph Priv1["Private Subnet 1 — 10.0.11.0/24"]
+                EC2Order["EC2: order-service\n:8080"]
+            end
+        end
+
+        subgraph AZ2["AZ ap-southeast-1b"]
+            subgraph Pub2["Public Subnet 2 — 10.0.2.0/24"]
+                ALB2["ALB node"]
+            end
+            subgraph Priv2["Private Subnet 2 — 10.0.12.0/24"]
+                EC2Payment["EC2: payment-service\n:8081"]
+            end
+        end
+
+        RDSSG[("rds-sg\n5432 — no instance yet")]
+        RedisSG[("redis-sg\n6379 — no instance yet")]
+        IAMRole[["IAM role: app-role\n(CloudWatch Logs, S3, SSM,\nECR ReadOnly, CW Agent)"]]
+        CWLogs[("CloudWatch Logs\n/microservice/order-service\n/microservice/payment-service")]
+        SSMParam[("SSM Parameter Store\nCloudWatch Agent config")]
+    end
+
+    Pub1 -.associated with.-> RTPub
+    Pub2 -.associated with.-> RTPub
+    Priv1 -.associated with.-> RTPriv
+    Priv2 -.associated with.-> RTPriv
+
+    RTPub -->|"0.0.0.0/0"| IGW
+    RTPriv -->|"0.0.0.0/0"| NAT
+
+    Internet <-->|"80/443, inbound"| IGW
+    IGW <-->|"80/443 (alb-sg)"| ALB1
+    IGW <-->|"80/443 (alb-sg)"| ALB2
+    NAT <-->|"0.0.0.0/0, outbound"| IGW
+    IGW <-->|"0.0.0.0/0, outbound"| Internet
+
+    ALB1 -->|"/api/orders → :8080\n(ec2-sg, local route — no IGW)"| EC2Order
+    ALB2 -->|"/api/payments → :8081\n(ec2-sg, local route — no IGW)"| EC2Payment
+
+    EC2Order -->|"egress via RTPriv"| NAT
+    EC2Payment -->|"egress via RTPriv"| NAT
+
+    EC2Order -.->|"5432 (sg ref)"| RDSSG
+    EC2Payment -.->|"5432 (sg ref)"| RDSSG
+    EC2Order -.->|"6379 (sg ref)"| RedisSG
+    EC2Payment -.->|"6379 (sg ref)"| RedisSG
+
+    EC2Order -.-> IAMRole
+    EC2Payment -.-> IAMRole
+    EC2Order -->|"agent logs/metrics"| CWLogs
+    EC2Payment -->|"agent logs/metrics"| CWLogs
+    EC2Order --> SSMParam
+    EC2Payment --> SSMParam
+
+    Admin -->|"ssm:StartSession\n(tag SSMAccess=true)"| EC2Order
+    Admin -->|"ssm:StartSession\n(tag SSMAccess=true)"| EC2Payment
+```
+
+Notes:
+- `rds-sg` / `redis-sg` are provisioned in [security_groups.tf](security_groups.tf) but no `aws_db_instance`/`aws_elasticache_cluster` exists yet — shown as reserved for future use.
+- **The IGW is the gate for every packet crossing the VPC boundary — inbound to the ALB and outbound from the NAT alike.** It's not egress-only: an internet client's request to the ALB's public IP is delivered through the IGW (which 1:1 NATs the public IP to the ALB's private ENI) before it ever reaches the ALB.
+- **ALB → EC2 is the one path that never touches the IGW**, because both live inside the same VPC — it matches the `local` route AWS adds implicitly to every route table for the VPC's CIDR (`10.0.0.0/16`). That route isn't shown in [route_table.tf](route_table.tf) because Terraform doesn't manage it; AWS injects it automatically, and it always wins over the `0.0.0.0/0` routes for any destination inside the VPC.
+- Dotted lines denote security-group references or IAM role attachment (no live traffic); solid lines denote actual network/route paths.
+- Admin access is via SSM Session Manager only — no SSH path exists into the private subnets from the Internet.
+
