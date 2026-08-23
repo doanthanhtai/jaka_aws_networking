@@ -25,7 +25,7 @@ data "aws_ami" "amazon_linux" {
 # EC2 Instance
 ###############################################
 
-resource "aws_instance" "ec2_order" {
+resource "aws_instance" "ec2_order_1" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.private_1.id
@@ -38,12 +38,48 @@ resource "aws_instance" "ec2_order" {
   })
 
   tags = {
-    Name      = "${local.name_prefix}-ec2-order"
+    Name      = "${local.name_prefix}-ec2-order-1"
     SSMAccess = "true"
   }
 }
 
-resource "aws_instance" "ec2_payment" {
+resource "aws_instance" "ec2_order_2" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.private_2.id
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+  associate_public_ip_address = false
+  iam_instance_profile        = aws_iam_instance_profile.microservice_instance_profile.name
+
+  user_data = templatefile("${path.module}/templates/cloudwatch-agent-bootstrap.sh.tpl", {
+    ssm_parameter_name = aws_ssm_parameter.order_service_agent_config.name
+  })
+
+  tags = {
+    Name      = "${local.name_prefix}-ec2-order-2"
+    SSMAccess = "true"
+  }
+}
+
+resource "aws_instance" "ec2_payment_1" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.private_1.id
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+  associate_public_ip_address = false
+  iam_instance_profile        = aws_iam_instance_profile.microservice_instance_profile.name
+
+  user_data = templatefile("${path.module}/templates/cloudwatch-agent-bootstrap.sh.tpl", {
+    ssm_parameter_name = aws_ssm_parameter.payment_service_agent_config.name
+  })
+
+  tags = {
+    Name      = "${local.name_prefix}-ec2-payment-1"
+    SSMAccess = "true"
+  }
+}
+
+resource "aws_instance" "ec2_payment_2" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.private_2.id
@@ -56,7 +92,7 @@ resource "aws_instance" "ec2_payment" {
   })
 
   tags = {
-    Name      = "${local.name_prefix}-ec2-payment"
+    Name      = "${local.name_prefix}-ec2-payment-2"
     SSMAccess = "true"
   }
 }

@@ -20,13 +20,23 @@ output "alb_dns_name" {
 # EC2
 ###############################################
 
-output "ec2_order_private_ip" {
+output "ec2_order_private_ip_1" {
   description = "The private IP address of the EC2 instance"
-  value       = aws_instance.ec2_order.private_ip
+  value       = aws_instance.ec2_order_1.private_ip
+}
+
+output "ec2_order_private_ip_2" {
+  description = "The private IP address of the EC2 instance"
+  value       = aws_instance.ec2_order_2.private_ip
 }
 
 
-output "ec2_payment_private_ip" {
+output "ec2_payment_private_ip_1" {
   description = "The private IP address of the EC2 instance"
-  value       = aws_instance.ec2_payment.private_ip
+  value       = aws_instance.ec2_payment_1.private_ip
+}
+
+output "ec2_payment_private_ip_2" {
+  description = "The private IP address of the EC2 instance"
+  value       = aws_instance.ec2_payment_2.private_ip
 }
