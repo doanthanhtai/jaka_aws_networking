@@ -73,5 +73,49 @@ variable "ssh_allowed_cidr" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.large"
+}
+
+########################
+# ECR / container images
+########################
+
+variable "order_ecr_repo_name" {
+  description = "ECR repository name for the order-service image"
+  type        = string
+  default     = "order-service"
+}
+
+variable "payment_ecr_repo_name" {
+  description = "ECR repository name for the payment-service image"
+  type        = string
+  default     = "payment-service"
+}
+
+variable "image_tag" {
+  description = "Image tag to deploy for order-service and payment-service"
+  type        = string
+  default     = "v1"
+}
+
+########################
+# Auto Scaling
+########################
+
+variable "asg_min_size" {
+  description = "Minimum size for the order/payment Auto Scaling Groups"
+  type        = number
+  default     = 1
+}
+
+variable "asg_max_size" {
+  description = "Maximum size for the order/payment Auto Scaling Groups"
+  type        = number
+  default     = 4
+}
+
+variable "asg_desired_capacity" {
+  description = "Desired capacity for the order/payment Auto Scaling Groups"
+  type        = number
+  default     = 2
 }
