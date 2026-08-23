@@ -29,3 +29,13 @@ output "payment_asg_name" {
   description = "The name of the payment-service Auto Scaling Group"
   value       = aws_autoscaling_group.payment_asg.name
 }
+
+output "order_db_endpoint" {
+  description = "The connection endpoint of the order-service RDS instance"
+  value       = aws_db_instance.order_db.endpoint
+}
+
+output "payment_db_endpoint" {
+  description = "The connection endpoint of the payment-service RDS instance"
+  value       = aws_db_instance.payment_db.endpoint
+}

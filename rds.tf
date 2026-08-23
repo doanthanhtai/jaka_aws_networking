@@ -1,0 +1,100 @@
+# Random password
+
+resource "random_password" "order_db" {
+  length           = 20
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "payment_db" {
+  length           = 20
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+
+# DB subnet group
+
+resource "aws_db_subnet_group" "db_subnet" {
+  name       = "${local.name_prefix}-db-subnet-group"
+  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+
+  tags = {
+    Name = "${local.name_prefix}-db-subnet-group"
+  }
+}
+
+
+# RDS instances
+
+resource "aws_db_instance" "order_db" {
+  identifier        = "${local.name_prefix}-order-db"
+  engine            = "postgres"
+  engine_version    = var.postgres_engine_version
+  instance_class    = var.rds_instance_class
+  allocated_storage = var.rds_allocated_storage
+
+  db_name  = "orders"
+  username = local.order_db_username
+  password = random_password.order_db.result
+
+  db_subnet_group_name   = aws_db_subnet_group.db_subnet.name
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  publicly_accessible    = false
+
+  multi_az                = false
+  backup_retention_period = 0
+  skip_final_snapshot     = true
+
+  tags = {
+    Name = "${local.name_prefix}-order-db"
+  }
+}
+
+resource "aws_db_instance" "payment_db" {
+  identifier        = "${local.name_prefix}-payment-db"
+  engine            = "postgres"
+  engine_version    = var.postgres_engine_version
+  instance_class    = var.rds_instance_class
+  allocated_storage = var.rds_allocated_storage
+
+  db_name  = "payments"
+  username = local.payment_db_username
+  password = random_password.payment_db.result
+
+  db_subnet_group_name   = aws_db_subnet_group.db_subnet.name
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  publicly_accessible    = false
+
+  multi_az                = false
+  backup_retention_period = 0
+  skip_final_snapshot     = true
+
+  tags = {
+    Name = "${local.name_prefix}-payment-db"
+  }
+}
+
+resource "aws_ssm_parameter" "order_db_url" {
+  name  = local.order_db_url_param
+  type  = "String"
+  value = "jdbc:postgresql://${aws_db_instance.order_db.address}:${aws_db_instance.order_db.port}/${aws_db_instance.order_db.db_name}"
+}
+
+resource "aws_ssm_parameter" "order_db_password" {
+  name  = local.order_db_password_param
+  type  = "SecureString"
+  value = random_password.order_db.result
+}
+
+resource "aws_ssm_parameter" "payment_db_url" {
+  name  = local.payment_db_url_param
+  type  = "String"
+  value = "jdbc:postgresql://${aws_db_instance.payment_db.address}:${aws_db_instance.payment_db.port}/${aws_db_instance.payment_db.db_name}"
+}
+
+resource "aws_ssm_parameter" "payment_db_password" {
+  name  = local.payment_db_password_param
+  type  = "SecureString"
+  value = random_password.payment_db.result
+}

@@ -119,3 +119,18 @@ variable "asg_desired_capacity" {
   type        = number
   default     = 2
 }
+
+variable "rds_instance_class" {
+  type    = string
+  default = "db.t3.micro"
+}
+
+variable "rds_allocated_storage" {
+  type    = number
+  default = 20
+}
+
+variable "postgres_engine_version" {
+  type    = string
+  default = "16"
+}

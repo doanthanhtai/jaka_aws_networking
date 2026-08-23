@@ -14,6 +14,39 @@ resource "aws_iam_role" "microservice-ec2-role" {
   })
 }
 
+
+resource "aws_iam_policy" "app_ssm_parameter_read" {
+  name        = "${local.name_prefix}-app-ssm-parameter-read"
+  description = "Allow EC2 instance to read the order/payment DB connection parameters from SSM"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ReadAppDbParameters"
+        Effect = "Allow"
+        Action = "ssm:GetParameter"
+        Resource = [
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/order-*",
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/payment-*"
+        ]
+      },
+      {
+        Sid      = "DecryptSecureStringDefaultKey"
+        Effect   = "Allow"
+        Action   = "kms:Decrypt"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "app_ssm_parameter_read" {
+  role       = aws_iam_role.microservice-ec2-role.name
+  policy_arn = aws_iam_policy.app_ssm_parameter_read.arn
+}
+
+
 resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
   role       = aws_iam_role.microservice-ec2-role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"

@@ -15,4 +15,7 @@ locals {
   order_db_password_param   = "/${var.environment}/order-db-password"
   payment_db_url_param      = "/${var.environment}/payment-db-url"
   payment_db_password_param = "/${var.environment}/payment-db-password"
+
+  order_db_username   = "order_admin"
+  payment_db_username = "payment_admin"
 }

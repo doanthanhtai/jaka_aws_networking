@@ -44,6 +44,7 @@ docker run -d \
   --name ${container_name} \
   -p ${container_port}:${container_port} \
   -e SPRING_DATASOURCE_URL="$DB_URL" \
+  -e SPRING_DATASOURCE_USERNAME="${db_username}" \
   -e SPRING_DATASOURCE_PASSWORD="$DB_PASS" \
   --restart always \
   ${image}

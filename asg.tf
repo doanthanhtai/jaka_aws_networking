@@ -43,6 +43,7 @@ resource "aws_launch_template" "order_lt" {
     image                 = local.order_image
     container_name        = "order-service"
     container_port        = aws_lb_target_group.order_tg.port
+    db_username           = local.order_db_username
     db_url_param          = local.order_db_url_param
     db_password_param     = local.order_db_password_param
     cw_ssm_parameter_name = aws_ssm_parameter.order_service_agent_config.name
@@ -74,6 +75,7 @@ resource "aws_launch_template" "payment_lt" {
     image                 = local.payment_image
     container_name        = "payment-service"
     container_port        = aws_lb_target_group.payment_tg.port
+    db_username           = local.payment_db_username
     db_url_param          = local.payment_db_url_param
     db_password_param     = local.payment_db_password_param
     cw_ssm_parameter_name = aws_ssm_parameter.payment_service_agent_config.name
