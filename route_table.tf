@@ -54,7 +54,7 @@ resource "aws_route_table" "route_table_private_1" {
 }
 
 resource "aws_route_table" "route_table_private_2" {
-  
+
   vpc_id = aws_vpc.main.id
 
   tags = {
@@ -77,7 +77,7 @@ resource "aws_route" "private_internet_access_1" {
 }
 
 resource "aws_route" "private_internet_access_2" {
-  
+
   route_table_id = aws_route_table.route_table_private_2.id
 
   destination_cidr_block = "0.0.0.0/0"

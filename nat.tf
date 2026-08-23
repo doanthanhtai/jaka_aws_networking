@@ -43,11 +43,11 @@ resource "aws_nat_gateway" "nat_gw_1" {
 resource "aws_nat_gateway" "nat_gw_2" {
   allocation_id = aws_eip.nat_eip_2.id
 
-  subnet_id     = aws_subnet.public_2.id
-  
+  subnet_id = aws_subnet.public_2.id
+
   tags = {
     Name = "${local.name_prefix}-nat-2"
   }
 
-  depends_on = [ aws_internet_gateway.main ]
+  depends_on = [aws_internet_gateway.main]
 }
