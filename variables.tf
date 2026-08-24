@@ -73,7 +73,7 @@ variable "ssh_allowed_cidr" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.large"
+  default     = "t3.micro"
 }
 
 ########################
@@ -95,7 +95,7 @@ variable "payment_ecr_repo_name" {
 variable "image_tag" {
   description = "Image tag to deploy for order-service and payment-service"
   type        = string
-  default     = "v1"
+  default     = "latest"
 }
 
 ########################

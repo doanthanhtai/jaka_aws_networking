@@ -112,6 +112,13 @@ resource "aws_autoscaling_group" "order_asg" {
     version = "$Latest"
   }
 
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+    }
+  }
+
   tag {
     key                 = "Name"
     value               = "${local.name_prefix}-order-asg"
@@ -141,6 +148,13 @@ resource "aws_autoscaling_group" "payment_asg" {
   launch_template {
     id      = aws_launch_template.payment_lt.id
     version = "$Latest"
+  }
+  
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+    }
   }
 
   tag {
