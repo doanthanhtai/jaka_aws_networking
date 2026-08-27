@@ -134,3 +134,16 @@ variable "postgres_engine_version" {
   type    = string
   default = "16"
 }
+
+variable "rds_retention_period" {
+  description = "Number of days to retain automated RDS backups"
+  type        = number
+  default     = 7
+}
+
+variable "rds_skip_final_snapshot" {
+  description = "Whehter to skip taking a final DB snapshot when the instance is deleted/replaced. Keep true for dev/lab/staging; set false for production env to avoid data loss"
+  type        = bool
+  default     = true
+}
+

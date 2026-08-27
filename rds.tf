@@ -42,9 +42,11 @@ resource "aws_db_instance" "order_db" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   publicly_accessible    = false
 
-  multi_az                = false
-  backup_retention_period = 0
-  skip_final_snapshot     = true
+  multi_az                  = true
+  backup_retention_period   = var.rds_retention_period
+  skip_final_snapshot       = var.rds_skip_final_snapshot
+  storage_encrypted         = true
+  final_snapshot_identifier = "${local.name_prefix}-order-db-final-snapshot"
 
   tags = {
     Name = "${local.name_prefix}-order-db"
@@ -66,9 +68,11 @@ resource "aws_db_instance" "payment_db" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   publicly_accessible    = false
 
-  multi_az                = false
-  backup_retention_period = 0
-  skip_final_snapshot     = true
+  multi_az                  = true
+  backup_retention_period   = var.rds_retention_period
+  skip_final_snapshot       = var.rds_skip_final_snapshot
+  storage_encrypted         = true
+  final_snapshot_identifier = "${local.name_prefix}-payment-db-final-snapshot"
 
   tags = {
     Name = "${local.name_prefix}-payment-db"
