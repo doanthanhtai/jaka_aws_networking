@@ -12,6 +12,17 @@ resource "random_password" "payment_db" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
+resource "random_password" "order_app_user" {
+  length           = 20
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "payment_app_user" {
+  length           = 20
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 
 # DB subnet group
 
@@ -101,4 +112,16 @@ resource "aws_ssm_parameter" "payment_db_password" {
   name  = local.payment_db_password_param
   type  = "SecureString"
   value = random_password.payment_db.result
+}
+
+resource "aws_ssm_parameter" "order_app_user_db_password" {
+  name  = local.order_app_db_password_param
+  type  = "SecureString"
+  value = random_password.order_app_user.result
+}
+
+resource "aws_ssm_parameter" "payment_app_user_db_password" {
+  name  = local.payment_app_db_password_param
+  type  = "SecureString"
+  value = random_password.payment_app_user.result
 }

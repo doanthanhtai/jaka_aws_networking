@@ -35,18 +35,25 @@ resource "aws_launch_template" "order_lt" {
     name = aws_iam_instance_profile.microservice_instance_profile.name
   }
 
+  depends_on = [aws_ssm_parameter.order_app_user_db_password]
+
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   user_data = base64encode(templatefile("${path.module}/templates/service-bootstrap.sh.tpl", {
-    region                = var.region
-    ecr_registry          = local.ecr_registry
-    image                 = local.order_image
-    container_name        = "order-service"
-    container_port        = aws_lb_target_group.order_tg.port
-    db_username           = local.order_db_username
-    db_url_param          = local.order_db_url_param
-    db_password_param     = local.order_db_password_param
-    cw_ssm_parameter_name = aws_ssm_parameter.order_service_agent_config.name
+    region                  = var.region
+    ecr_registry            = local.ecr_registry
+    image                   = local.order_image
+    container_name          = "order-service"
+    container_port          = aws_lb_target_group.order_tg.port
+    db_host                 = aws_db_instance.order_db.address
+    db_port                 = aws_db_instance.order_db.port
+    db_name                 = aws_db_instance.order_db.db_name
+    db_admin_username       = local.order_db_username
+    db_admin_password_param = local.order_db_password_param
+    db_app_username         = local.order_app_db_username
+    db_url_param            = local.order_db_url_param
+    db_app_password_param   = local.order_app_db_password_param
+    cw_ssm_parameter_name   = aws_ssm_parameter.order_service_agent_config.name
   }))
 
   tag_specifications {
@@ -67,18 +74,25 @@ resource "aws_launch_template" "payment_lt" {
     name = aws_iam_instance_profile.microservice_instance_profile.name
   }
 
+  depends_on = [aws_ssm_parameter.payment_app_user_db_password]
+
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   user_data = base64encode(templatefile("${path.module}/templates/service-bootstrap.sh.tpl", {
-    region                = var.region
-    ecr_registry          = local.ecr_registry
-    image                 = local.payment_image
-    container_name        = "payment-service"
-    container_port        = aws_lb_target_group.payment_tg.port
-    db_username           = local.payment_db_username
-    db_url_param          = local.payment_db_url_param
-    db_password_param     = local.payment_db_password_param
-    cw_ssm_parameter_name = aws_ssm_parameter.payment_service_agent_config.name
+    region                  = var.region
+    ecr_registry            = local.ecr_registry
+    image                   = local.payment_image
+    container_name          = "payment-service"
+    container_port          = aws_lb_target_group.payment_tg.port
+    db_host                 = aws_db_instance.payment_db.address
+    db_port                 = aws_db_instance.payment_db.port
+    db_name                 = aws_db_instance.payment_db.db_name
+    db_admin_username       = local.payment_db_username
+    db_admin_password_param = local.payment_db_password_param
+    db_app_username         = local.payment_app_db_username
+    db_url_param            = local.payment_db_url_param
+    db_app_password_param   = local.payment_app_db_password_param
+    cw_ssm_parameter_name   = aws_ssm_parameter.payment_service_agent_config.name
   }))
 
   tag_specifications {
@@ -149,7 +163,7 @@ resource "aws_autoscaling_group" "payment_asg" {
     id      = aws_launch_template.payment_lt.id
     version = "$Latest"
   }
-  
+
   instance_refresh {
     strategy = "Rolling"
     preferences {

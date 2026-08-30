@@ -19,6 +19,8 @@ if ! command -v aws >/dev/null 2>&1; then
   /tmp/aws/install
 fi
 
+apt-get install -y postgresql-client
+
 # CloudWatch Agent
 curl -s -o /tmp/amazon-cloudwatch-agent.deb \
   "https://s3.${region}.amazonaws.com/amazoncloudwatch-agent-${region}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
@@ -38,13 +40,36 @@ docker pull ${image}
 
 # Run container with environment from Systems Manager Parameter Store
 DB_URL=$(aws ssm get-parameter --region ${region} --name ${db_url_param} --query 'Parameter.Value' --output text)
-DB_PASS=$(aws ssm get-parameter --region ${region} --name ${db_password_param} --with-decryption --query 'Parameter.Value' --output text)
+DB_PASS=$(aws ssm get-parameter --region ${region} --name ${db_app_password_param} --with-decryption --query 'Parameter.Value' --output text)
+
+# Ensure the app's least-privilege DB login exists — created here (not by Terraform) because
+# this instance is the only thing allowed through rds-sg; idempotent, safe on every boot/refresh.
+ADMIN_DB_PASS=$(aws ssm get-parameter --region ${region} --name ${db_admin_password_param} --with-decryption --query 'Parameter.Value' --output text)
+
+PGPASSWORD="$ADMIN_DB_PASS" psql -h ${db_host} -p ${db_port} -U ${db_admin_username} -d ${db_name} \
+  -v ON_ERROR_STOP=1 -v app_pass="$DB_PASS" <<'SQL'
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${db_app_username}') THEN
+    CREATE ROLE ${db_app_username} LOGIN PASSWORD :'app_pass';
+  ELSE
+    ALTER ROLE ${db_app_username} WITH PASSWORD :'app_pass';
+  END IF;
+END
+$$;
+
+GRANT CREATE, USAGE ON SCHEMA public TO ${db_app_username};
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA public TO ${db_app_username};
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO ${db_app_username};
+ALTER DEFAULT PRIVILEGES FOR ROLE ${db_admin_username} IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLES TO ${db_app_username};
+ALTER DEFAULT PRIVILEGES FOR ROLE ${db_admin_username} IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO ${db_app_username};
+SQL
 
 docker run -d \
   --name ${container_name} \
   -p ${container_port}:${container_port} \
   -e SPRING_DATASOURCE_URL="$DB_URL" \
-  -e SPRING_DATASOURCE_USERNAME="${db_username}" \
+  -e SPRING_DATASOURCE_USERNAME="${db_app_username}" \
   -e SPRING_DATASOURCE_PASSWORD="$DB_PASS" \
   --restart always \
   ${image}

@@ -138,7 +138,7 @@ variable "postgres_engine_version" {
 variable "rds_retention_period" {
   description = "Number of days to retain automated RDS backups"
   type        = number
-  default     = 7
+  default     = 1
 }
 
 variable "rds_skip_final_snapshot" {
@@ -146,4 +146,3 @@ variable "rds_skip_final_snapshot" {
   type        = bool
   default     = true
 }
-

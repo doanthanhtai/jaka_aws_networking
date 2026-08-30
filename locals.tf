@@ -18,4 +18,10 @@ locals {
 
   order_db_username   = "order_admin"
   payment_db_username = "payment_admin"
+
+  order_app_db_username         = "order_user"
+  payment_app_db_username       = "payment_user"
+  order_app_db_password_param   = "/${var.environment}/order-user-db-password"
+  payment_app_db_password_param = "/${var.environment}/payment-user-db-password"
+
 }
