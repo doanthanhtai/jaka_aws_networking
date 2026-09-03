@@ -48,15 +48,13 @@ ADMIN_DB_PASS=$(aws ssm get-parameter --region ${region} --name ${db_admin_passw
 
 PGPASSWORD="$ADMIN_DB_PASS" psql -h ${db_host} -p ${db_port} -U ${db_admin_username} -d ${db_name} \
   -v ON_ERROR_STOP=1 -v app_pass="$DB_PASS" <<'SQL'
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${db_app_username}') THEN
-    CREATE ROLE ${db_app_username} LOGIN PASSWORD :'app_pass';
-  ELSE
-    ALTER ROLE ${db_app_username} WITH PASSWORD :'app_pass';
-  END IF;
-END
-$$;
+SELECT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${db_app_username}') AS role_exists \gset
+
+\if :role_exists
+ALTER ROLE ${db_app_username} WITH PASSWORD :'app_pass';
+\else
+CREATE ROLE ${db_app_username} LOGIN PASSWORD :'app_pass';
+\endif
 
 GRANT CREATE, USAGE ON SCHEMA public TO ${db_app_username};
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA public TO ${db_app_username};
