@@ -59,6 +59,8 @@ resource "aws_db_instance" "order_db" {
   storage_encrypted         = true
   final_snapshot_identifier = "${local.name_prefix}-order-db-final-snapshot"
 
+  parameter_group_name = aws_db_parameter_group.order_db.name
+
   tags = {
     Name = "${local.name_prefix}-order-db"
   }
@@ -85,6 +87,8 @@ resource "aws_db_instance" "payment_db" {
   storage_encrypted         = true
   final_snapshot_identifier = "${local.name_prefix}-payment-db-final-snapshot"
 
+  parameter_group_name = aws_db_parameter_group.payment_db.name
+
   tags = {
     Name = "${local.name_prefix}-payment-db"
   }
@@ -93,7 +97,7 @@ resource "aws_db_instance" "payment_db" {
 resource "aws_ssm_parameter" "order_db_url" {
   name  = local.order_db_url_param
   type  = "String"
-  value = "jdbc:postgresql://${aws_db_instance.order_db.address}:${aws_db_instance.order_db.port}/${aws_db_instance.order_db.db_name}"
+  value = "jdbc:postgresql://${aws_db_instance.order_db.address}:${aws_db_instance.order_db.port}/${aws_db_instance.order_db.db_name}?sslmode=require"
 }
 
 resource "aws_ssm_parameter" "order_db_password" {
@@ -105,7 +109,7 @@ resource "aws_ssm_parameter" "order_db_password" {
 resource "aws_ssm_parameter" "payment_db_url" {
   name  = local.payment_db_url_param
   type  = "String"
-  value = "jdbc:postgresql://${aws_db_instance.payment_db.address}:${aws_db_instance.payment_db.port}/${aws_db_instance.payment_db.db_name}"
+  value = "jdbc:postgresql://${aws_db_instance.payment_db.address}:${aws_db_instance.payment_db.port}/${aws_db_instance.payment_db.db_name}?sslmode=require"
 }
 
 resource "aws_ssm_parameter" "payment_db_password" {
@@ -124,4 +128,25 @@ resource "aws_ssm_parameter" "payment_app_user_db_password" {
   name  = local.payment_app_db_password_param
   type  = "SecureString"
   value = random_password.payment_app_user.result
+}
+
+resource "aws_db_parameter_group" "order_db" {
+  name   = "${local.name_prefix}-order-pg"
+  family = "postgres16"
+  parameter {
+    name         = "rds.force_ssl"
+    value        = "1"
+    apply_method = "pending-reboot"
+  }
+}
+
+resource "aws_db_parameter_group" "payment_db" {
+  name   = "${local.name_prefix}-payment-pg"
+  family = "postgres16"
+  parameter {
+    name         = "rds.force_ssl"
+    value        = "1"
+    apply_method = "pending-reboot"
+  }
+
 }
