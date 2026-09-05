@@ -39,3 +39,18 @@ output "payment_db_endpoint" {
   description = "The connection endpoint of the payment-service RDS instance"
   value       = aws_db_instance.payment_db.endpoint
 }
+
+output "redis_primary_endpoint" {
+  description = "Primary endpoint of the shared Elasticache Redis replication group"
+  value       = aws_elasticache_replication_group.main.primary_endpoint_address
+}
+
+output "redis_reader_endpoint" {
+  description = "Reader endpoint of the shared Elasticache Redis replication group"
+  value       = aws_elasticache_replication_group.main.reader_endpoint_address
+}
+
+output "redis_port" {
+  description = "Port of the shared Elasticache Redis replication group"
+  value       = aws_elasticache_replication_group.main.port
+}

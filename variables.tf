@@ -146,3 +146,21 @@ variable "rds_skip_final_snapshot" {
   type        = bool
   default     = true
 }
+
+variable "redis_engine_version" {
+  description = "ElastiCache Redis engine version"
+  type        = string
+  default     = "7.1" # matches redis:7-alpine used in both services' docker-compose.yml
+}
+
+variable "redis_node_type" {
+  description = "ElastiCache node instance type"
+  type        = string
+  default     = "cache.t3.micro"
+}
+
+variable "redis_port" {
+  description = "ElastiCache Redis port"
+  type        = number
+  default     = 6379
+}

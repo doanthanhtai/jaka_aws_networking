@@ -35,7 +35,7 @@ resource "aws_launch_template" "order_lt" {
     name = aws_iam_instance_profile.microservice_instance_profile.name
   }
 
-  depends_on = [aws_ssm_parameter.order_app_user_db_password]
+  depends_on = [aws_ssm_parameter.order_app_user_db_password, aws_elasticache_replication_group.main]
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
@@ -54,6 +54,10 @@ resource "aws_launch_template" "order_lt" {
     db_url_param            = local.order_db_url_param
     db_app_password_param   = local.order_app_db_password_param
     cw_ssm_parameter_name   = aws_ssm_parameter.order_service_agent_config.name
+    redis_endpoint_param    = local.redis_primary_endpoint_param
+    redis_port_param        = local.redis_port_param
+    redis_auth_param        = local.redis_auth_token_param
+    redis_database_index    = 0
   }))
 
   tag_specifications {
@@ -74,7 +78,7 @@ resource "aws_launch_template" "payment_lt" {
     name = aws_iam_instance_profile.microservice_instance_profile.name
   }
 
-  depends_on = [aws_ssm_parameter.payment_app_user_db_password]
+  depends_on = [aws_ssm_parameter.payment_app_user_db_password, aws_elasticache_replication_group.main]
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
@@ -93,6 +97,10 @@ resource "aws_launch_template" "payment_lt" {
     db_url_param            = local.payment_db_url_param
     db_app_password_param   = local.payment_app_db_password_param
     cw_ssm_parameter_name   = aws_ssm_parameter.payment_service_agent_config.name
+    redis_endpoint_param    = local.redis_primary_endpoint_param
+    redis_port_param        = local.redis_port_param
+    redis_auth_param        = local.redis_auth_token_param
+    redis_database_index    = 1
   }))
 
   tag_specifications {

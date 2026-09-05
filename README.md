@@ -249,6 +249,15 @@ curl -I https://www.google.com > nat_proof.txt
 |---|---|
 | Applications inside EC2 are reachable through the ALB DNS | ![Access via ALB DNS](pictures_proof/curl_ec2_health_check.png) |
 | Target groups are healthy | ![Target group healthy](pictures_proof/target_group_healthy_proof.png) |
+| Springboot App connect RDS | ![Springboot App connect RDS](pictures_proof/instances_asg_connect_rds_proof.png) |
+
+
+### Elasticache
+| Claim                 | Proof                                                     |
+|---------------------- |-----------------------------------------------------------|
+| redis-cli inside ec2  | ![redis-cli](pictures_proof/redis-cli-inside-ec2.png)     |
+| app logs (rds + redis)| ![redis-cli](pictures_proof/ec2_logs_redis_rds_proof.png) |
+
 
 ---
 

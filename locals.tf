@@ -24,4 +24,9 @@ locals {
   order_app_db_password_param   = "/${var.environment}/order-user-db-password"
   payment_app_db_password_param = "/${var.environment}/payment-user-db-password"
 
+  redis_primary_endpoint_param = "/${var.environment}/redis-primary-endpoint"
+  redis_reader_endpoint_param  = "/${var.environment}/redis-reader-endpoint"
+  redis_port_param             = "/${var.environment}/redis-port"
+  redis_auth_token_param       = "/${var.environment}/redis-auth-token"
+
 }

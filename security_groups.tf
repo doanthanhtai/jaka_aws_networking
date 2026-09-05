@@ -101,7 +101,7 @@ resource "aws_security_group" "redis_sg" {
 resource "aws_vpc_security_group_ingress_rule" "redis_ingress_rule" {
   security_group_id            = aws_security_group.redis_sg.id
   ip_protocol                  = "tcp"
-  from_port                    = 6379
-  to_port                      = 6379
+  from_port                    = var.redis_port
+  to_port                      = var.redis_port
   referenced_security_group_id = aws_security_group.ec2_sg.id
 }

@@ -19,7 +19,7 @@ if ! command -v aws >/dev/null 2>&1; then
   /tmp/aws/install
 fi
 
-apt-get install -y postgresql-client
+apt-get install -y postgresql-client redis-tools
 
 # CloudWatch Agent
 curl -s -o /tmp/amazon-cloudwatch-agent.deb \
@@ -41,6 +41,9 @@ docker pull ${image}
 # Run container with environment from Systems Manager Parameter Store
 DB_URL=$(aws ssm get-parameter --region ${region} --name ${db_url_param} --query 'Parameter.Value' --output text)
 DB_PASS=$(aws ssm get-parameter --region ${region} --name ${db_app_password_param} --with-decryption --query 'Parameter.Value' --output text)
+REDIS_HOST=$(aws ssm get-parameter --region ${region} --name ${redis_endpoint_param} --query 'Parameter.Value' --output text)
+REDIS_PORT=$(aws ssm get-parameter --region ${region} --name ${redis_port_param} --query 'Parameter.Value' --output text)
+REDIS_AUTH=$(aws ssm get-parameter --region ${region} --name ${redis_auth_param} --with-decryption --query 'Parameter.Value' --output text)
 
 # Ensure the app's least-privilege DB login exists — created here (not by Terraform) because
 # this instance is the only thing allowed through rds-sg; idempotent, safe on every boot/refresh.
@@ -66,8 +69,14 @@ SQL
 docker run -d \
   --name ${container_name} \
   -p ${container_port}:${container_port} \
+  -e SERVER_PORT="${container_port}" \
   -e SPRING_DATASOURCE_URL="$DB_URL" \
   -e SPRING_DATASOURCE_USERNAME="${db_app_username}" \
   -e SPRING_DATASOURCE_PASSWORD="$DB_PASS" \
+  -e SPRING_DATA_REDIS_HOST="$REDIS_HOST" \
+  -e SPRING_DATA_REDIS_PORT="$REDIS_PORT" \
+  -e SPRING_DATA_REDIS_SSL_ENABLED="true" \
+  -e SPRING_DATA_REDIS_DATABASE="${redis_database_index}" \
+  -e SPRING_DATA_REDIS_PASSWORD="$REDIS_AUTH" \
   --restart always \
   ${image}
