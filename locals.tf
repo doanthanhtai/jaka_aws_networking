@@ -29,4 +29,6 @@ locals {
   redis_port_param             = "/${var.environment}/redis-port"
   redis_auth_token_param       = "/${var.environment}/redis-auth-token"
 
+  s3_bucket_name = "${local.name_prefix}-microservices-${data.aws_caller_identity.current.account_id}"
+
 }

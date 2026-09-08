@@ -164,3 +164,21 @@ variable "redis_port" {
   type        = number
   default     = 6379
 }
+
+variable "s3_ia_transition_days" {
+  description = "Days ater object creattion before transitioning to STANDARD_IA"
+  type        = number
+  default     = 30
+}
+
+variable "s3_glacier_transition_days" {
+  description = "Days after object creation transitioning to GLACIER"
+  type        = number
+  default     = 90
+}
+
+variable "s3_noncurrent_version_expiration_days" {
+  description = "Days to keep noncurrent (old) object versions before permanent deletion"
+  type        = number
+  default     = 90
+}

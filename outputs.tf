@@ -54,3 +54,13 @@ output "redis_port" {
   description = "Port of the shared Elasticache Redis replication group"
   value       = aws_elasticache_replication_group.main.port
 }
+
+output "s3_bucket_name" {
+  description = "Name of the shared microservices S3 bucket (orders/, payments/ prefixes)"
+  value       = aws_s3_bucket.microservices.id
+}
+
+output "s3_bucket_arn" {
+  description = "ARN of the shared microservices S3 bucket"
+  value       = aws_s3_bucket.microservices.arn
+}
