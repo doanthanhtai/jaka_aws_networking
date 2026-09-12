@@ -61,6 +61,11 @@ resource "aws_db_instance" "order_db" {
 
   parameter_group_name = aws_db_parameter_group.order_db.name
 
+  enabled_cloudwatch_logs_exports = [
+    "postgresql",
+    "upgrade"
+  ]
+
   tags = {
     Name = "${local.name_prefix}-order-db"
   }
@@ -88,6 +93,11 @@ resource "aws_db_instance" "payment_db" {
   final_snapshot_identifier = "${local.name_prefix}-payment-db-final-snapshot"
 
   parameter_group_name = aws_db_parameter_group.payment_db.name
+
+  enabled_cloudwatch_logs_exports = [
+    "postgresql",
+    "upgrade"
+  ]
 
   tags = {
     Name = "${local.name_prefix}-payment-db"

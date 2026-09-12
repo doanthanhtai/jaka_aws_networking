@@ -29,6 +29,14 @@ locals {
   redis_port_param             = "/${var.environment}/redis-port"
   redis_auth_token_param       = "/${var.environment}/redis-auth-token"
 
+  # ElastiCache names member clusters from the replication group ID with a zero-padded suffix.
+  redis_cluster_ids = {
+    for index in range(var.redis_num_cache_clusters) :
+    tostring(index) => "${local.name_prefix}-redis-${format("%03d", index + 1)}"
+  }
+
   s3_bucket_name = "${local.name_prefix}-microservices-${data.aws_caller_identity.current.account_id}"
+
+  alarm_actions = [aws_sns_topic.alarms.arn]
 
 }

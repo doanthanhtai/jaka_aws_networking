@@ -17,7 +17,7 @@ resource "aws_elasticache_replication_group" "main" {
   node_type      = var.redis_node_type
   port           = var.redis_port
 
-  num_cache_clusters         = 2
+  num_cache_clusters         = var.redis_num_cache_clusters
   automatic_failover_enabled = true
   multi_az_enabled           = true
 

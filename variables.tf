@@ -165,6 +165,17 @@ variable "redis_port" {
   default     = 6379
 }
 
+variable "redis_num_cache_clusters" {
+  description = "Number of Redis cache clusters in the replication group"
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.redis_num_cache_clusters >= 2
+    error_message = "redis_num_cache_clusters must be at least 2 when automatic failover is enabled."
+  }
+}
+
 variable "s3_ia_transition_days" {
   description = "Days ater object creattion before transitioning to STANDARD_IA"
   type        = number
@@ -181,4 +192,80 @@ variable "s3_noncurrent_version_expiration_days" {
   description = "Days to keep noncurrent (old) object versions before permanent deletion"
   type        = number
   default     = 90
+}
+
+variable "alarm_email" {
+  description = "Email endpoint for SNS alarm"
+  type        = string
+}
+
+variable "alarm_cpu_high_threshold" {
+  description = "EC2/ASG average CPU percent that triggers the high-CPU alarm"
+  type        = number
+  default     = 70
+}
+
+variable "alarm_memory_high_threshold" {
+  description = "EC2/ASG average memory percent (CWAgent) that triggers the high-memory alarm"
+  type        = number
+  default     = 80
+}
+
+variable "alarm_rds_cpu_threshold" {
+  description = "RDS CPU percent that triggers the high-CPU alarm"
+  type        = number
+  default     = 75
+}
+
+variable "alarm_rds_connections_threshold" {
+  description = "RDS DatabaseConnections count that triggers the connection-pressure alarm"
+  type        = number
+  default     = 80
+}
+
+variable "alarm_rds_free_storage_bytes" {
+  description = "RDS FreeStorageSpace in bytes below which the low-storage alarm fires"
+  type        = number
+  default     = 2147483648 # 2 GiB
+}
+
+variable "alarm_alb_5xx_threshold" {
+  description = "Count of ALB-generated 5xx responses per 5 minutes that triggers the alarm"
+  type        = number
+  default     = 5
+}
+
+variable "alarm_alb_latency_seconds" {
+  description = "ALB p95 target response time in seconds that triggers the latency alarm"
+  type        = number
+  default     = 2
+}
+
+variable "alarm_redis_cpu_threshold" {
+  description = "ElastiCache CPU percent that triggers the alarm"
+  type        = number
+  default     = 75
+}
+
+variable "alarm_redis_memory_threshold" {
+  description = "ElastiCache DatabaseMemoryUsagePercentage that triggers the alarm"
+  type        = number
+  default     = 75
+}
+
+variable "asg_target_cpu" {
+  description = "Target average CPU percent for the ASG target-tracking scaling policy"
+  type        = number
+  default     = 60
+}
+
+variable "alarm_disk_high_threshold" {
+  description = "EC2/ASG average disk usage percent (CWAgent) that triggers the high-disk alarm"
+  type        = number
+  default     = 80
+
+  validation {
+    condition     = var.alarm_disk_high_threshold >= 50 && var.alarm_disk_high_threshold <= 90
+    error_message = "alarm_disk_high_threshold must be between 50 and 90."
+  }
 }

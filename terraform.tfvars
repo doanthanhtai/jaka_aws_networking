@@ -3,7 +3,7 @@ environment = "dev"
 
 region = "ap-southeast-1"
 
-image_tag = "v1.0.0"
+image_tag = "v1.0.2"
 
 vpc_cidr = "10.0.0.0/16"
 
@@ -15,3 +15,5 @@ private_subnet_2_cidr = "10.0.12.0/24"
 
 az1 = "ap-southeast-1a"
 az2 = "ap-southeast-1b"
+
+alarm_email = "ggtaidt9@gmail.com"
