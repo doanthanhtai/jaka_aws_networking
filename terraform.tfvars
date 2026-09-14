@@ -3,7 +3,7 @@ environment = "dev"
 
 region = "ap-southeast-1"
 
-image_tag = "v1.0.2"
+image_tag = "v1.0.3"
 
 vpc_cidr = "10.0.0.0/16"
 

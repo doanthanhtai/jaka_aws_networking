@@ -289,7 +289,24 @@ resource "aws_cloudwatch_dashboard" "main" {
           view   = "table"
           query  = "SOURCE '${aws_cloudwatch_log_group.order_service.name}' | SOURCE '${aws_cloudwatch_log_group.payment_service.name}' | fields @timestamp, @logStream, @message | filter @message like /ERROR/ | sort @timestamp desc | limit 50"
         }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 42
+        width  = 24
+        height = 6
+        properties = {
+          title  = "App HTTP latency (avg ms) per service/uri"
+          region = var.region
+          period = 60
+          view   = "timeSeries"
+          metrics = [
+            [{ expression = "SEARCH('Namespace=\"${local.app_metrics_namespace}\" MetricName=\"http.server.requests.avg\"', 'Average', 60)", id = "e1", label = "" }]
+          ]
+        }
       }
+
     ]
   })
 }

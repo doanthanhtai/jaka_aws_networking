@@ -355,3 +355,101 @@ resource "aws_cloudwatch_metric_alarm" "payment_asg_disk_high" {
   ok_actions    = local.alarm_actions
 }
 
+resource "aws_cloudwatch_metric_alarm" "order_hikari_pool_high" {
+  alarm_name          = "${local.name_prefix}-order-hikari-pool-high"
+  alarm_description   = "Order service HikariCP pool usage above ${var.alarm_hikari_pool_threshold}%"
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = var.alarm_hikari_pool_threshold
+  evaluation_periods  = 3
+  treat_missing_data  = "notBreaching"
+
+  metric_query {
+    id          = "usage"
+    expression  = "100 * active / max"
+    label       = "Hikari pool usage %"
+    return_data = true
+  }
+
+  metric_query {
+    id = "active"
+    metric {
+      namespace   = local.app_metrics_namespace
+      metric_name = "hikaricp.connections.active.value"
+      period      = 60
+      stat        = "Maximum"
+      dimensions = {
+        service     = "order-service"
+        environment = var.environment
+        pool        = "HikariPool-1"
+      }
+    }
+  }
+
+  metric_query {
+    id = "max"
+    metric {
+      namespace   = local.app_metrics_namespace
+      metric_name = "hikaricp.connections.max.value"
+      period      = 60
+      stat        = "Maximum"
+      dimensions = {
+        service     = "order-service"
+        environment = var.environment
+        pool        = "HikariPool-1"
+      }
+    }
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+}
+
+resource "aws_cloudwatch_metric_alarm" "payment_hikari_pool_high" {
+  alarm_name          = "${local.name_prefix}-payment-hikari-pool-high"
+  alarm_description   = "payment-service Hikari pool usage above ${var.alarm_hikari_pool_threshold}%"
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = var.alarm_hikari_pool_threshold
+  evaluation_periods  = 3
+  treat_missing_data  = "notBreaching"
+
+  metric_query {
+    id          = "usage"
+    expression  = "100 * active / max"
+    label       = "Hikari pool usage %"
+    return_data = true
+  }
+
+  metric_query {
+    id = "active"
+    metric {
+      namespace   = local.app_metrics_namespace
+      metric_name = "hikaricp.connections.active.value"
+      period      = 60
+      stat        = "Maximum"
+      dimensions = {
+        service     = "payment-service"
+        environment = var.environment
+        pool        = "HikariPool-1"
+      }
+    }
+  }
+
+  metric_query {
+    id = "max"
+    metric {
+      namespace   = local.app_metrics_namespace
+      metric_name = "hikaricp.connections.max.value"
+      period      = 60
+      stat        = "Maximum"
+      dimensions = {
+        service     = "payment-service"
+        environment = var.environment
+        pool        = "HikariPool-1"
+      }
+    }
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+}

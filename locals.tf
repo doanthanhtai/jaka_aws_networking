@@ -39,4 +39,6 @@ locals {
 
   alarm_actions = [aws_sns_topic.alarms.arn]
 
+  app_metrics_namespace = "Microservices/App"
+
 }

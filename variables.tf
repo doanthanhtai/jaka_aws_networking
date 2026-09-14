@@ -281,3 +281,9 @@ variable "log_retention_days" {
   type        = number
   default     = 7
 }
+
+variable "alarm_hikari_pool_threshold" {
+  description = "Hikari pool threshold"
+  type        = number
+  default     = 90
+}

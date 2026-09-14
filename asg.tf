@@ -58,6 +58,8 @@ resource "aws_launch_template" "order_lt" {
     redis_port_param        = local.redis_port_param
     redis_auth_param        = local.redis_auth_token_param
     redis_database_index    = 0
+    environment             = var.environment
+    metrics_namespace       = local.app_metrics_namespace
   }))
 
   tag_specifications {
@@ -66,6 +68,12 @@ resource "aws_launch_template" "order_lt" {
       Name      = "${local.name_prefix}-order"
       SSMAccess = "true"
     }
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
   }
 }
 
@@ -101,6 +109,8 @@ resource "aws_launch_template" "payment_lt" {
     redis_port_param        = local.redis_port_param
     redis_auth_param        = local.redis_auth_token_param
     redis_database_index    = 1
+    environment             = var.environment
+    metrics_namespace       = local.app_metrics_namespace
   }))
 
   tag_specifications {
@@ -109,6 +119,12 @@ resource "aws_launch_template" "payment_lt" {
       Name      = "${local.name_prefix}-payment"
       SSMAccess = "true"
     }
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
   }
 }
 
