@@ -66,6 +66,8 @@ resource "aws_db_instance" "order_db" {
     "upgrade"
   ]
 
+  depends_on = [aws_cloudwatch_log_group.order_db_postgresql]
+
   tags = {
     Name = "${local.name_prefix}-order-db"
   }
@@ -98,6 +100,8 @@ resource "aws_db_instance" "payment_db" {
     "postgresql",
     "upgrade"
   ]
+
+  depends_on = [aws_cloudwatch_log_group.payment_db_postgresql]
 
   tags = {
     Name = "${local.name_prefix}-payment-db"

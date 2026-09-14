@@ -141,6 +141,10 @@ resource "aws_autoscaling_group" "order_asg" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [desired_capacity]
+  }
+
   tag {
     key                 = "Name"
     value               = "${local.name_prefix}-order-asg"
@@ -177,6 +181,10 @@ resource "aws_autoscaling_group" "payment_asg" {
     preferences {
       min_healthy_percentage = 50
     }
+  }
+
+  lifecycle {
+    ignore_changes = [desired_capacity]
   }
 
   tag {

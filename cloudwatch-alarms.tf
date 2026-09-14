@@ -1,11 +1,11 @@
 resource "aws_cloudwatch_metric_alarm" "order_asg_cpu_high" {
   alarm_name          = "${local.name_prefix}-order-asg-cpu-high"
-  alarm_description   = "order-service ASG average CPU above ${var.alarm_cpu_high_threshold}% for 10 minutes"
+  alarm_description   = "order-service ASG average CPU above ${var.alarm_cpu_high_threshold}% for 5 minutes"
   namespace           = "AWS/EC2"
   metric_name         = "CPUUtilization"
   statistic           = "Average"
   period              = 300
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   threshold           = var.alarm_cpu_high_threshold
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
@@ -20,12 +20,12 @@ resource "aws_cloudwatch_metric_alarm" "order_asg_cpu_high" {
 
 resource "aws_cloudwatch_metric_alarm" "payment_asg_cpu_high" {
   alarm_name          = "${local.name_prefix}-payment-asg-cpu-high"
-  alarm_description   = "payment-service ASG average CPU above ${var.alarm_cpu_high_threshold}% for 10 minutes"
+  alarm_description   = "payment-service ASG average CPU above ${var.alarm_cpu_high_threshold}% for 5 minutes"
   namespace           = "AWS/EC2"
   metric_name         = "CPUUtilization"
   statistic           = "Average"
   period              = 300
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   threshold           = var.alarm_cpu_high_threshold
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
@@ -329,7 +329,6 @@ resource "aws_cloudwatch_metric_alarm" "order_asg_disk_high" {
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.order_asg.name
-    path                 = "/"
   }
 
   alarm_actions = local.alarm_actions
@@ -350,7 +349,6 @@ resource "aws_cloudwatch_metric_alarm" "payment_asg_disk_high" {
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.payment_asg.name
-    path                 = "/"
   }
 
   alarm_actions = local.alarm_actions

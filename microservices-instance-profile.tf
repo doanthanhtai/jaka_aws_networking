@@ -75,10 +75,10 @@ resource "aws_iam_role_policy_attachment" "app_ssm_parameter_read" {
 }
 
 
-resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
-  role       = aws_iam_role.microservice-ec2-role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
-}
+# resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
+#   role       = aws_iam_role.microservice-ec2-role.name
+#   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+# }
 
 resource "aws_iam_role_policy_attachment" "app_s3_access" {
   role       = aws_iam_role.microservice-ec2-role.name

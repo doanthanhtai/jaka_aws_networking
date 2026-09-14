@@ -64,3 +64,18 @@ output "s3_bucket_arn" {
   description = "ARN of the shared microservices S3 bucket"
   value       = aws_s3_bucket.microservices.arn
 }
+
+output "cloudwatch_dashboard_url" {
+  description = "Console URL of the CloudWatch overview dashboard"
+  value       = "https://${var.region}.console.aws.amazon.com/cloudwatch/home?region=${var.region}#dashboards:name=${aws_cloudwatch_dashboard.main.dashboard_name}"
+}
+
+output "alarms_sns_topic_arn" {
+  description = "SNS topic that receives every CloudWatch alarm and RDS event"
+  value       = aws_sns_topic.alarms.arn
+}
+
+output "app_log_group_names" {
+  description = "CloudWatch log groups receiving the service container logs"
+  value       = values(local.app_log_groups)
+}

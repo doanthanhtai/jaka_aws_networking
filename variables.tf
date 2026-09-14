@@ -269,3 +269,15 @@ variable "alarm_disk_high_threshold" {
     error_message = "alarm_disk_high_threshold must be between 50 and 90."
   }
 }
+
+variable "alarm_log_errors_threshold" {
+  description = "Number of ERROR log lines per 5 minutes (per service) that triggers the alarm"
+  type        = number
+  default     = 10
+}
+
+variable "log_retention_days" {
+  description = "Retention for RDS-exported PostgreSQL logs in CloudWatch Logs"
+  type        = number
+  default     = 7
+}
