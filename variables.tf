@@ -93,7 +93,7 @@ variable "payment_ecr_repo_name" {
 }
 
 variable "image_tag" {
-  description = "Image tag to deploy for order-service and payment-service"
+  description = "Initial image tag written to the per-service image-tag SSM parameters; after creation, scripts/deploy.sh owns the value"
   type        = string
   default     = "latest"
 }

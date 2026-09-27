@@ -32,34 +32,35 @@ resource "aws_launch_template" "order_lt" {
   instance_type = var.instance_type
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.microservice_instance_profile.name
+    name = aws_iam_instance_profile.app["order"].name
   }
 
-  depends_on = [aws_ssm_parameter.order_app_user_db_password, aws_elasticache_replication_group.main]
+  depends_on = [aws_secretsmanager_secret_version.order_app_db, aws_secretsmanager_secret_version.redis_auth, aws_elasticache_replication_group.main]
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   user_data = base64encode(templatefile("${path.module}/templates/service-bootstrap.sh.tpl", {
-    region                  = var.region
-    ecr_registry            = local.ecr_registry
-    image                   = local.order_image
-    container_name          = "order-service"
-    container_port          = aws_lb_target_group.order_tg.port
-    db_host                 = aws_db_instance.order_db.address
-    db_port                 = aws_db_instance.order_db.port
-    db_name                 = aws_db_instance.order_db.db_name
-    db_admin_username       = local.order_db_username
-    db_admin_password_param = local.order_db_password_param
-    db_app_username         = local.order_app_db_username
-    db_url_param            = local.order_db_url_param
-    db_app_password_param   = local.order_app_db_password_param
-    cw_ssm_parameter_name   = aws_ssm_parameter.order_service_agent_config.name
-    redis_endpoint_param    = local.redis_primary_endpoint_param
-    redis_port_param        = local.redis_port_param
-    redis_auth_param        = local.redis_auth_token_param
-    redis_database_index    = 0
-    environment             = var.environment
-    metrics_namespace       = local.app_metrics_namespace
+    region                = var.region
+    ecr_registry          = local.ecr_registry
+    image_repo            = local.order_image_repo
+    image_tag_param       = aws_ssm_parameter.order_image_tag.name
+    container_name        = "order-service"
+    container_port        = aws_lb_target_group.order_tg.port
+    db_host               = aws_db_instance.order_db.address
+    db_port               = aws_db_instance.order_db.port
+    db_name               = aws_db_instance.order_db.db_name
+    db_admin_username     = local.order_db_username
+    db_admin_secret_arn   = aws_db_instance.order_db.master_user_secret[0].secret_arn
+    db_app_username       = local.order_app_db_username
+    db_url_param          = local.order_db_url_param
+    db_app_secret_arn     = aws_secretsmanager_secret.order_app_db.arn
+    cw_ssm_parameter_name = aws_ssm_parameter.order_service_agent_config.name
+    redis_endpoint_param  = local.redis_primary_endpoint_param
+    redis_port_param      = local.redis_port_param
+    redis_auth_secret_arn = aws_secretsmanager_secret.redis_auth.arn
+    redis_database_index  = 0
+    environment           = var.environment
+    metrics_namespace     = local.app_metrics_namespace
   }))
 
   tag_specifications {
@@ -83,34 +84,35 @@ resource "aws_launch_template" "payment_lt" {
   instance_type = var.instance_type
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.microservice_instance_profile.name
+    name = aws_iam_instance_profile.app["payment"].name
   }
 
-  depends_on = [aws_ssm_parameter.payment_app_user_db_password, aws_elasticache_replication_group.main]
+  depends_on = [aws_secretsmanager_secret_version.payment_app_db, aws_secretsmanager_secret_version.redis_auth, aws_elasticache_replication_group.main]
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   user_data = base64encode(templatefile("${path.module}/templates/service-bootstrap.sh.tpl", {
-    region                  = var.region
-    ecr_registry            = local.ecr_registry
-    image                   = local.payment_image
-    container_name          = "payment-service"
-    container_port          = aws_lb_target_group.payment_tg.port
-    db_host                 = aws_db_instance.payment_db.address
-    db_port                 = aws_db_instance.payment_db.port
-    db_name                 = aws_db_instance.payment_db.db_name
-    db_admin_username       = local.payment_db_username
-    db_admin_password_param = local.payment_db_password_param
-    db_app_username         = local.payment_app_db_username
-    db_url_param            = local.payment_db_url_param
-    db_app_password_param   = local.payment_app_db_password_param
-    cw_ssm_parameter_name   = aws_ssm_parameter.payment_service_agent_config.name
-    redis_endpoint_param    = local.redis_primary_endpoint_param
-    redis_port_param        = local.redis_port_param
-    redis_auth_param        = local.redis_auth_token_param
-    redis_database_index    = 1
-    environment             = var.environment
-    metrics_namespace       = local.app_metrics_namespace
+    region                = var.region
+    ecr_registry          = local.ecr_registry
+    image_repo            = local.payment_image_repo
+    image_tag_param       = aws_ssm_parameter.payment_image_tag.name
+    container_name        = "payment-service"
+    container_port        = aws_lb_target_group.payment_tg.port
+    db_host               = aws_db_instance.payment_db.address
+    db_port               = aws_db_instance.payment_db.port
+    db_name               = aws_db_instance.payment_db.db_name
+    db_admin_username     = local.payment_db_username
+    db_admin_secret_arn   = aws_db_instance.payment_db.master_user_secret[0].secret_arn
+    db_app_username       = local.payment_app_db_username
+    db_url_param          = local.payment_db_url_param
+    db_app_secret_arn     = aws_secretsmanager_secret.payment_app_db.arn
+    cw_ssm_parameter_name = aws_ssm_parameter.payment_service_agent_config.name
+    redis_endpoint_param  = local.redis_primary_endpoint_param
+    redis_port_param      = local.redis_port_param
+    redis_auth_secret_arn = aws_secretsmanager_secret.redis_auth.arn
+    redis_database_index  = 1
+    environment           = var.environment
+    metrics_namespace     = local.app_metrics_namespace
   }))
 
   tag_specifications {
@@ -153,7 +155,9 @@ resource "aws_autoscaling_group" "order_asg" {
   instance_refresh {
     strategy = "Rolling"
     preferences {
-      min_healthy_percentage = 50
+      min_healthy_percentage = 100
+      max_healthy_percentage = 200
+      instance_warmup        = 120
     }
   }
 
@@ -195,7 +199,9 @@ resource "aws_autoscaling_group" "payment_asg" {
   instance_refresh {
     strategy = "Rolling"
     preferences {
-      min_healthy_percentage = 50
+      min_healthy_percentage = 100
+      max_healthy_percentage = 200
+      instance_warmup        = 120
     }
   }
 

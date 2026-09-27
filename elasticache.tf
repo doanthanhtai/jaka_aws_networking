@@ -52,9 +52,3 @@ resource "aws_ssm_parameter" "redis_port" {
   type  = "String"
   value = tostring(aws_elasticache_replication_group.main.port)
 }
-
-resource "aws_ssm_parameter" "redis_auth_token" {
-  name  = local.redis_auth_token_param
-  type  = "SecureString"
-  value = random_password.redis_auth.result
-}

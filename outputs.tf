@@ -79,3 +79,29 @@ output "app_log_group_names" {
   description = "CloudWatch log groups receiving the service container logs"
   value       = values(local.app_log_groups)
 }
+
+output "region" {
+  description = "AWS region the stack is deployed in"
+  value       = var.region
+}
+
+output "order_ecr_repository_url" {
+  description = "ECR repository URL for order-service images"
+  value       = aws_ecr_repository.order_service.repository_url
+}
+
+output "payment_ecr_repository_url" {
+  description = "ECR repository URL for payment-service images"
+  value       = aws_ecr_repository.payment_service.repository_url
+}
+
+
+output "order_image_tag_param" {
+  description = "SSM parameter holding the order-service image tag the ASG boots"
+  value       = aws_ssm_parameter.order_image_tag.name
+}
+
+output "payment_image_tag_param" {
+  description = "SSM parameter holding the payment-service image tag the ASG boots"
+  value       = aws_ssm_parameter.payment_image_tag.name
+}
