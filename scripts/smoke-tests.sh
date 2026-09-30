@@ -13,7 +13,7 @@ check() { #name url grep-pattern
         echo " PASS $1"
     else
         echo " FAIL $1 ($2)"
-        FIAILED=1
+        FAILED=1
     fi
 }
 
@@ -21,11 +21,11 @@ for svc in $SERVICES; do
     base="$ALB/api/${svc}s"
     echo "$svc-service"
     check "health UP" "$base/actuator/health" '"status":"UP"'
-    check "list returns seeded rows (RDS)" "$base" '^\[{'
+    check "list returns seeded rows (RDS)" "$base/" '^\[{'
     check "redis round-trip" "$base/redis-check" '"status":"UP"'
     if [ -n "$EXPECTED_TAG" ]; then
         check "running version = $EXPECTED_TAG" "$base/actuator/info" "\"version\":\"$EXPECTED_TAG\""
     fi
 done
 
-[ "FAILED" -eq 0 ] && echo "All smoke tests passed" || {echo "Smoke tests FAILED" .&2; exit 1;}
+[ "$FAILED" -eq 0 ] && echo "All smoke tests passed" || { echo "Smoke tests FAILED" >&2; exit 1; }

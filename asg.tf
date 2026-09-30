@@ -141,7 +141,7 @@ resource "aws_autoscaling_group" "order_asg" {
   target_group_arns   = [aws_lb_target_group.order_tg.arn]
 
   health_check_type         = "ELB"
-  health_check_grace_period = 120
+  health_check_grace_period = 300
 
   min_size         = var.asg_min_size
   max_size         = var.asg_max_size
@@ -157,7 +157,7 @@ resource "aws_autoscaling_group" "order_asg" {
     preferences {
       min_healthy_percentage = 100
       max_healthy_percentage = 200
-      instance_warmup        = 120
+      instance_warmup        = 300
     }
   }
 
@@ -185,7 +185,7 @@ resource "aws_autoscaling_group" "payment_asg" {
   target_group_arns   = [aws_lb_target_group.payment_tg.arn]
 
   health_check_type         = "ELB"
-  health_check_grace_period = 120
+  health_check_grace_period = 300
 
   min_size         = var.asg_min_size
   max_size         = var.asg_max_size
@@ -201,7 +201,7 @@ resource "aws_autoscaling_group" "payment_asg" {
     preferences {
       min_healthy_percentage = 100
       max_healthy_percentage = 200
-      instance_warmup        = 120
+      instance_warmup        = 300
     }
   }
 

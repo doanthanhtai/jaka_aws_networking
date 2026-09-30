@@ -13,7 +13,7 @@ REPO_URL=$(tf_out "${SERVICE}_ecr_repository_url")
 
 aws ecr describe-images --repository-name "${REPO_URL#*/}" --image-ids imageTag="$TAG" >/dev/null ||
 
-    {echo "Image $TAG not found in ECR - run build-and-push.sh first" >&2; exit 1;}
+    { echo "Image $TAG not found in ECR - run build-and-push.sh first" >&2; exit 1; }
 
 CURRENT=$(awst ssm get-parameter --name "$PARAM" --query Parameter.Value)
 if [ "$CURRENT" != "$TAG" ]; then
@@ -24,7 +24,7 @@ echo "$SERVICE: $CURRENT -> $TAG (ASG $ASG)"
 
 REFRESH_ID=$(awst autoscaling start-instance-refresh \
     --auto-scaling-group-name "$ASG" \
-    --preferences '{"MinHealthyPercentage":100, "MaxHealthyPercentage":200, "InstanceWarmup":120}' \
+    --preferences '{"MinHealthyPercentage":100, "MaxHealthyPercentage":200, "InstanceWarmup":300}' \
     --query InstanceRefreshId)
 
 while true; do
@@ -34,7 +34,7 @@ while true; do
     echo "$(date +%T) refresh $STATUS ${PCT}%"
     case "$STATUS" in
     Successful) break ;;
-    Faile | Cancelled | RollbackSuccessful | RollbackFailed)
+    Failed | Cancelled | RollbackSuccessful | RollbackFailed)
         echo "Deploy failed. Roll back with ./scripts/rollback.sh $SERVICE" >&2
         exit 1
         ;;
@@ -42,4 +42,4 @@ while true; do
     sleep 20
 done
 
-"TF_ROOT/scripts/smoke-tests.sh" "$SERVICE" "$TAG"
+"$TF_ROOT/scripts/smoke-tests.sh" "$SERVICE" "$TAG"

@@ -6,7 +6,7 @@ SERVICE=${1:-}
 TAG=${2:?usage: build-and-push.sh <order|payment> <tag>}
 require_service "${SERVICE}"
 
-REPO_URL=${tf_out "${SERVICE}_ecr_repository_url"}
+REPO_URL=$(tf_out "${SERVICE}_ecr_repository_url")
 REGISTRY=${REPO_URL%%/*}
 REPO_NAME=${REPO_URL#*/}
 SRC_DIR="$TF_ROOT/../${SERVICE}-service/${SERVICE}-service"

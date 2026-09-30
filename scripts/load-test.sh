@@ -9,7 +9,7 @@ TOTAL=0
 FAIL=0
 
 while [ $SECONDS -lt $END ]; do
-    for url in "$ALB/api/orders" "$ALB/api/payments"; do
+    for url in "$ALB/api/orders/" "$ALB/api/payments/"; do
         code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" || echo 000)
         TOTAL=$((TOTAL + 1))
         if [ "${code:0:1}" != "2" ]; then
